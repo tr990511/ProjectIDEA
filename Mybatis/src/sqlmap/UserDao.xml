@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace：命名空间，用于隔离sql，还有一个很重要的作用，后面会讲 -->
+<mapper namespace="com.tr.mybatis.dao.UserDao">
+    <select id="findUserById" parameterType="Integer" resultType="com.tr.mybatis.pojo.User">
+        select * from user where id=#{v}
+    </select>
+    <resultMap type="user" id="userOrderResultMap">
+        <id property="id" column="id" />
+        <result property="username" column="username" />
+        <result property="birthday" column="birthday" />
+        <result property="sex" column="sex" />
+        <result property="address" column="address" />
+
+        <!-- 配置一对多的关系 -->
+        <collection property="orderList" javaType="list" ofType="com.tr.mybatis.pojo.Order">
+            <!-- 配置主键，是关联Order的唯一标识 -->
+            <id property="id" column="oid" />
+            <result property="number" column="number" />
+            <result property="createtime" column="createtime" />
+            <result property="note" column="note" />
+        </collection>
+    </resultMap>
+
+    <!-- 一对多关联，查询订单同时查询该用户下的订单 -->
+    <select id="queryUserOrder" resultMap="userOrderResultMap">
+	SELECT
+	u.id,
+	u.username,
+	u.birthday,
+	u.sex,
+	u.address,
+	o.id oid,
+	o.number,
+	o.createtime,
+	o.note
+	FROM
+	user u
+	LEFT JOIN orders o ON u.id = o.user_id
+	where u.id=#{id}
+</select>
+
+    <!-- 根据ids查询用户 -->
+    <select id="queryUserByIds" parameterType="queryVo" resultType="user">
+        SELECT * FROM user
+        <where>
+            <!-- foreach标签，进行遍历 -->
+            <!-- collection：遍历的集合，这里是QueryVo的ids属性 -->
+            <!-- item：遍历的项目，可以随便写，，但是和后面的#{}里面要一致 -->
+            <!-- open：在前面添加的sql片段 -->
+            <!-- close：在结尾处添加的sql片段 -->
+            <!-- separator：指定遍历的元素之间使用的分隔符 -->
+            <foreach collection="ids" item="item" open="id IN (" close=")" separator=",">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+</mapper>

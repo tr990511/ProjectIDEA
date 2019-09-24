@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace：命名空间，用于隔离sql，还有一个很重要的作用，后面会讲 -->
+<mapper namespace="com.tr.mybatis.dao.OrderDao">
+    <resultMap type="order" id="orderUserResultMap">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="number" column="number" />
+        <!-- association ：配置一对一属性 -->
+        <!-- property:order里面的User属性名 -->
+        <!-- javaType:属性类型 -->
+        <association property="user" javaType="user">
+            <!-- id:声明主键，表示user_id是关联查询对象的唯一标识-->
+            <id property="id" column="user_id" />
+            <result property="username" column="username" />
+            <result property="address" column="address" />
+        </association>
+
+    </resultMap>
+<!--    resultMap="orderUserResultMap"-->
+    <select id="findOrderUser" resultType="com.tr.mybatis.pojo.Order">
+        SELECT
+        o.id,
+        o.user_id,
+        o.number,
+        o.createtime,
+        o.note,
+        u.id as 'user.id',
+        u.username as 'user.username',
+        u.address as 'user.address'
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+    </select>
+</mapper>
